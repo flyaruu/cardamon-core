@@ -23,12 +23,7 @@ use entities::{cpu, iteration, run};
 use sea_orm::*;
 use serde_json::Value;
 use std::{
-    collections::HashMap,
-    fs::{self, OpenOptions},
-    io::Write,
-    path::Path,
-    process::{exit, Command},
-    time::Duration,
+    collections::HashMap, fs::{self, OpenOptions}, io::Write, path::Path, process::{exit, Command}, str::from_utf8, time::Duration
 };
 use subprocess::{Exec, NullFile, Redirection};
 use sysinfo::{CpuRefreshKind, RefreshKind, System};
@@ -456,9 +451,10 @@ async fn run_scenario<'a>(
         .await
         .context(format!("Tokio command failed to run {command}"))?;
     info!("Ran command {}", scenario.command);
+    info!("StdOut:\n {}",from_utf8(&output.stdout).unwrap());
+    // info!("StdErr:\n {}",from_utf8(&output.stderr).unwrap());
     if output.status.success() {
         let stop = Utc::now().timestamp_millis();
-
         let scenario_iteration = iteration::ActiveModel {
             id: ActiveValue::NotSet,
             run_id: ActiveValue::Set(run_id),

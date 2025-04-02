@@ -43,6 +43,7 @@ async fn spa_fallback() -> impl IntoResponse {
 // struct below, where folder = "examples/public/".
 async fn static_handler(uri: Uri) -> impl IntoResponse {
     let path = uri.path().trim_start_matches('/').to_string();
+    println!("Querying path: {}",path);
     StaticFile(path)
 }
 
