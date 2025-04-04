@@ -65,7 +65,7 @@ fn ask_for_tdp() -> Power {
     }
 }
 
-fn find_cpu() -> Option<String> {
+pub fn find_cpu() -> Option<String> {
     let sys = System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything()));
     sys.cpus().first().map(|cpu| cpu.brand().to_string())
 }
