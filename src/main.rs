@@ -1,12 +1,6 @@
 use anyhow::Context;
 use cardamon::{
-    carbon_intensity::{fetch_ci, fetch_region_code, valid_region_code, GLOBAL_CI},
-    cleanup_stdout_stderr,
-    config::{self, Config, ExecutionPlan, ProcessToObserve},
-    data::{dataset::LiveDataFilter, dataset_builder::DatasetBuilder, Data},
-    db_connect, db_migrate, init_config,
-    models::rab_model,
-    run, server,
+    carbon_intensity::{fetch_ci, fetch_region_code, valid_region_code, GLOBAL_CI}, cleanup_stdout_stderr, config::{self, Config, ExecutionPlan, ProcessToObserve}, data::{dataset::LiveDataFilter, dataset_builder::DatasetBuilder, Data}, db_connect, db_migrate, find_cpu, init_config, models::rab_model, run, server
 };
 use chrono::{TimeZone, Utc};
 use clap::{Parser, Subcommand};
@@ -71,6 +65,9 @@ pub enum Commands {
 
     #[command(about = "Wizard for creating a cardamon.toml file")]
     Init,
+
+    #[command(about = "Detect cpu, print to out, and exit")]
+    DetectCpu,
 }
 
 fn load_config(file: &Option<String>) -> anyhow::Result<Config> {
@@ -202,6 +199,18 @@ async fn main() -> anyhow::Result<()> {
     match args.command {
         Commands::Init => {
             init_config().await;
+        }
+
+        Commands::DetectCpu => {
+            let msg = match find_cpu() {
+                Some(cpu) => {
+                    format!("CPU detected: {}",cpu).green()
+                },
+                None => {
+                    "CPU could not be detected".to_owned().red()
+                },
+            };
+            println!("{}",msg);
         }
 
         Commands::Run {
