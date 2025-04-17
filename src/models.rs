@@ -31,18 +31,18 @@ pub fn rab_model(metrics: &Vec<&Metrics>, power: &Power, ci_g_wh: f64) -> Data {
                     // assuming tdp is at 50% utilization
 
                     // I don't think cpu_usage is a percentage
-                    let avg_cpu = 0.5 * (x.cpu_usage + y.cpu_usage);
+                    // It ranges from 0..cpu_cores
+                    let avg_cpu_cores_usage = 0.5 * (x.cpu_usage + y.cpu_usage);
                     // println!("Process1:: {} Process2:: {} Delta_t: {} avg_cpu: {}",x.process_name,y.process_name, delta_t_millis,avg_cpu);
-                    println!("millis: {} name: {} - {} - avg: {}", delta_t_millis,x.process_name,y.process_name, avg_cpu);
+                    // println!("millis: {} name: {} - {} - avg: {}", delta_t_millis,x.process_name,y.process_name, avg_cpu_cores_usage);
                     // I think we also need to divide by the core count
-                    avg_cpu / 0.5 * tdp * delta_t_h / x.cpu_core_count as f64
+                    avg_cpu_cores_usage / 0.5 * tdp * delta_t_h / x.cpu_core_count as f64
                 }
             }
         })
         .collect_vec();
 
-    let pow_w = data.iter().fold(0_f64, |acc,x| x + acc);
-    println!("Total power: {}", pow_w);
+    let pow_w = data.iter().fold(0_f64, |acc, x| x + acc);
     let co2_g_wh = pow_w * ci_g_wh;
 
     Data {

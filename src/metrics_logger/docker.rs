@@ -139,6 +139,8 @@ pub async fn keep_logging(
                         last_stats_per_container.insert(container_name.to_owned(), stats);
                     }
                     Some(Err(e)) => {
+                        // TODO, first queries might fail if grace period is too short.
+                        // 
                         error!("Error getting stats for container {}: {}", container_id, e);
                         metrics_log.lock().unwrap().push_error(anyhow::anyhow!(
                             "Error getting stats for container {}: {}",
