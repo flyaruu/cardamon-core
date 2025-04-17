@@ -24,6 +24,7 @@ jobs:
         run: |
           card_ver=v$(cargo metadata --format-version=1 --no-deps | jq '.packages[0].version' | tr -d '"')
           echo "Ref name: ${{  github.ref_name }}"
+          echo "Card ver: ${card_ver}"
           if [[ $card_ver != "${{ github.ref_name }}" ]]; then exit 1; fi
 
   build:
