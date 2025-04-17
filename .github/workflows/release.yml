@@ -114,8 +114,8 @@ jobs:
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Build Cardamon
-        run: cargo publish --no-verify --allow-dirty --token ${{ secrets.CRATES_IO_TOKEN }}
+      # - name: Build Cardamon
+      #   run: cargo publish --no-verify --allow-dirty --token ${{ secrets.CRATES_IO_TOKEN }}
 
   release:
     needs: [publish_crate]
