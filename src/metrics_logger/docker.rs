@@ -4,6 +4,7 @@ use bollard::container::{ListContainersOptions, Stats, StatsOptions};
 use bollard::Docker;
 use chrono::Utc;
 use futures_util::stream::StreamExt;
+use tokio::time::sleep;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -100,8 +101,8 @@ pub async fn keep_logging(
             break;
         } else {
             warn!("No running containers, waiting 1s");
-
         }
+        sleep(Duration::from_secs(1)).await
     }
     if containers.is_empty() {
         warn!("Still no running containers");

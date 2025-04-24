@@ -27,7 +27,7 @@ RUN curl -L https://github.com/grafana/k6/releases/download/v0.58.0/k6-v0.58.0-l
 RUN rm -rf k6.zip k6-v0.58.0-linux-amd64
 
 # Install custom cardaon x86
-RUN curl -L https://github.com/flyaruu/cardamon-core/releases/download/v0.2.6/cardamon-x86_64-unknown-linux-gnu.tgz -o cardamon.tgz \
+RUN curl -L https://github.com/flyaruu/cardamon-core/releases/download/v0.2.9/cardamon-x86_64-unknown-linux-gnu.tgz -o cardamon.tgz \
     && tar xvfz cardamon.tgz \
     && mv cardamon /usr/local/bin/cardamon \
     && rm -rf cardamon.tgz cardamon/
