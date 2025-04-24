@@ -7,7 +7,7 @@ use futures_util::stream::StreamExt;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, info, warn};
 
 /// Enters an infinite loop logging metrics for each process to the metrics log. This function is
 /// intended to be called from `metrics_logger::log_scenario` or `metrics_logger::log_live`
@@ -92,11 +92,20 @@ pub async fn keep_logging(
     };
 
     // Wait 1s and re-try, this is not an error, containers take a while to spin up
+    for _ in 0..300 {
+        if !containers.is_empty() {
+            for container in &containers {
+                info!("Found container names: {:?}", container.names);
+            }
+            break;
+        } else {
+            warn!("No running containers, waiting 1s");
+
+        }
+    }
     if containers.is_empty() {
-        warn!("No running containers");
+        warn!("Still no running containers");
         return;
-        // tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-        // continue;
     }
 
     let mut last_stats_per_container: HashMap<String, Stats> = HashMap::new();
