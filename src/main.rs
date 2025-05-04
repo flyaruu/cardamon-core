@@ -7,6 +7,7 @@ use clap::{Parser, Subcommand};
 use colored::Colorize;
 use dotenvy::dotenv;
 use itertools::Itertools;
+use tracing::error;
 use std::{env, path::Path};
 use term_table::{row, row::Row, rows, table_cell::*, Table, TableStyle};
 use tracing_subscriber::EnvFilter;
@@ -171,7 +172,17 @@ async fn get_carbon_intensity(region_code: &Option<String>) -> f64 {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() {
+    match internal_main().await {
+        Ok(_) => {}
+        Err(err) => {
+            error!("Top level error: {}", err);
+            std::process::exit(1);
+        }
+    }
+}
+
+async fn internal_main() -> anyhow::Result<()> {
     // read .env file if it exists
     dotenv().ok();
 

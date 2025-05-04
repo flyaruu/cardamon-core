@@ -431,6 +431,7 @@ async fn run_scenario<'a>(
 ) -> anyhow::Result<iteration::ActiveModel> {
     let start = Utc::now().timestamp_millis();
 
+    info!("Running scenario {} with command {}", scenario.name, scenario.command);
     // Split the scenario_command into a vector
     let command_parts = match shlex::split(&scenario.command) {
         Some(command) => command,
@@ -443,6 +444,7 @@ async fn run_scenario<'a>(
         .ok_or_else(|| anyhow::anyhow!("Empty command"))?;
     let args = &command_parts[1..];
 
+    debug!("Args: {:?}", args);
     // run scenario ...
     let output = tokio::process::Command::new(command)
         .args(args)
