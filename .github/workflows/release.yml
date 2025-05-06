@@ -143,6 +143,8 @@ jobs:
           gh release create ${{  github.ref_name }} --draft --title "Release ${{ github.ref_name }}" --notes "" \
           artifacts/cardamon-x86_64-unknown-linux-gnu.tgz \
           artifacts/cardamon-x86_64-unknown-linux-gnu.tgz.sha256 \
+          artifacts/cardamon-aarch64-unknown-linux-gnu.tgz \
+          artifacts/cardamon-aarch64-unknown-linux-gnu.tgz.sha256 \
           artifacts/cardamon-x86_64-pc-windows-msvc.zip \
           artifacts/cardamon-x86_64-pc-windows-msvc.zip.sha256 \
           artifacts/cardamon-aarch64-apple-darwin.tgz \
