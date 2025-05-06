@@ -31,8 +31,6 @@ jobs:
     needs: [checks]
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        arch: [x86_64, aarch64]
         include:
           - os: ubuntu-latest
             arch: x86_64
