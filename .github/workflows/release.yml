@@ -31,7 +31,7 @@ jobs:
     needs: [checks]
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-latest-arm]
         include:
           - os: ubuntu-latest-arm
             target: aarch64-unknown-linux-gnu
