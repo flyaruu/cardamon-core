@@ -1,6 +1,6 @@
 [package]
 name = "cardamon"
-version = "0.2.11"
+version = "0.2.13"
 edition = "2021"
 authors = [
   "Oliver Winks <oliver@paperplane.software>",
