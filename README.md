@@ -179,14 +179,18 @@ Runs a single observation.
 
 ### Stats
 
-`cardamon stats [scenario_name]`
+`cardamon stats [-o text | json] [scenario_name]`
 
 Shows the stats for previous runs of scenarios.
+Output formats:
+ - text: Ascii table (default)
+ - json: Json format
 
 **_Options_**
 
 - **\*scenario_name**: An optional argument for the scenario you want to show stats for\*
 - **\*previous_runs**: The number of previous runs to show\*
+- **\*output: The output format
 
 ### Ui
 

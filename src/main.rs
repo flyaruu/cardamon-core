@@ -67,10 +67,10 @@ pub enum Commands {
             help = "Please provide a scenario name ('live_<observation name>' for live monitor data)"
         )]
         scenario_name: Option<String>,
-        
+
         #[arg(value_name = "NUMBER OF PREVIOUS", short = 'n')]
         previous_runs: Option<u64>,
-        #[arg(value_enum, default_value_t=StatsOutputFormat::Text, short ='o')]
+        #[arg(value_enum, default_value_t=StatsOutputFormat::Text, short ='o', long = "output")]
         output: StatsOutputFormat,
     },
 
