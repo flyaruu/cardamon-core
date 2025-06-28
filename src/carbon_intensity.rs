@@ -115,7 +115,7 @@ pub async fn fetch_ci(code: &str, date: &DateTime<Utc>) -> anyhow::Result<f64> {
 
 #[cfg(test)]
 mod tests {
-    use chrono::NaiveDate;
+    use chrono::{Datelike, NaiveDate};
 
     use super::*;
 
