@@ -8,6 +8,7 @@ pub mod metrics_logger;
 pub mod migrations;
 pub mod models;
 pub mod server;
+pub mod stats;
 
 use crate::{
     config::{Config, ExecutionMode},

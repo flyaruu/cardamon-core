@@ -3,13 +3,13 @@ use cardamon::{
     carbon_intensity::{fetch_ci, fetch_region_code, valid_region_code, GLOBAL_CI},
     cleanup_stdout_stderr,
     config::{self, Config, ExecutionPlan, ProcessToObserve},
-    data::{dataset::LiveDataFilter, dataset_builder::DatasetBuilder, Data},
+    data::{dataset::LiveDataFilter, Data},
     db_connect, db_migrate, init_config,
     models::rab_model,
-    run, server,
+    run, server, stats::{stats_output_json, stats_output_text},
 };
-use chrono::{TimeZone, Utc};
-use clap::{Parser, Subcommand};
+use chrono::Utc;
+use clap::{arg, Parser, Subcommand, ValueEnum};
 use colored::Colorize;
 use dotenvy::dotenv;
 use itertools::Itertools;
@@ -26,6 +26,15 @@ pub struct Cli {
 
     #[command(subcommand)]
     pub command: Commands,
+}
+
+#[derive(Clone, Debug, ValueEnum)]
+pub enum StatsOutputFormat {
+    #[value(alias("text"))]
+    Text,
+
+    #[value(alias("json"))]
+    Json,
 }
 
 #[derive(Subcommand, Debug)]
@@ -58,9 +67,11 @@ pub enum Commands {
             help = "Please provide a scenario name ('live_<observation name>' for live monitor data)"
         )]
         scenario_name: Option<String>,
-
+        
         #[arg(value_name = "NUMBER OF PREVIOUS", short = 'n')]
         previous_runs: Option<u64>,
+        #[arg(value_enum, default_value_t=StatsOutputFormat::Text, short ='o')]
+        output: StatsOutputFormat,
     },
 
     #[command(about = "Start the Cardamon UI server")]
@@ -303,75 +314,15 @@ async fn main() -> anyhow::Result<()> {
         Commands::Stats {
             scenario_name,
             previous_runs,
+            output,
         } => {
-            // build dataset
-            let dataset_builder = DatasetBuilder::new();
-            let dataset_rows = match scenario_name {
-                Some(scenario_name) => dataset_builder.scenario(&scenario_name).all(),
-                None => dataset_builder.scenarios_all().all(),
-            };
-            let dataset_cols = match previous_runs {
-                Some(n) => dataset_rows.last_n_runs(n).all(),
-                None => dataset_rows.runs_all().all(),
-            };
-            let dataset = dataset_cols.build(&db_conn).await?;
-
-            println!("\n{}", " Cardamon Stats \n".reversed().green());
-            if dataset.is_empty() {
-                println!("\nno data found!");
-            }
-
-            for scenario_dataset in dataset.by_scenario(LiveDataFilter::IncludeLive) {
-                println!(
-                    "Scenario {}:",
-                    scenario_dataset.scenario_name().to_string().green()
-                );
-
-                let mut table = Table::builder()
-                    .rows(rows![row![
-                        TableCell::builder("Datetime (Utc)".bold()).build(),
-                        TableCell::builder("Region".bold()).build(),
-                        TableCell::builder("Duration (s)".bold()).build(),
-                        TableCell::builder("Power (Wh)".bold()).build(),
-                        TableCell::builder("CI (gWh)".bold()).build(),
-                        TableCell::builder("CO2 (g)".bold()).build()
-                    ]])
-                    .style(TableStyle::rounded())
-                    .build();
-
-                // let mut points: Vec<(f32, f32)> = vec![];
-                // let mut run = 0.0;
-                for run_dataset in scenario_dataset.by_run() {
-                    let run_data = run_dataset.apply_model(&db_conn, &rab_model).await?;
-                    let run_region = run_data.region;
-                    let run_ci = run_data.ci;
-                    let run_start_time = Utc.timestamp_opt(run_data.start_time / 1000, 0).unwrap();
-                    let run_duration = (run_data.stop_time - run_data.start_time) as f64 / 1000.0;
-                    let _per_min_factor = 60.0 / run_duration;
-
-                    table.add_row(row![
-                        TableCell::new(run_start_time.format("%d/%m/%y %H:%M")),
-                        TableCell::new(run_region.unwrap_or_default()),
-                        TableCell::new(format!("{:.3}s", run_duration)),
-                        TableCell::new(format!("{:.4}Wh", run_data.data.pow)),
-                        TableCell::new(format!("{:.4}gWh", run_ci)),
-                        TableCell::new(format!("{:.4}g", run_data.data.co2)),
-                    ]);
-                    // points.push((run, run_data.data.pow as f32));
-                    // run += 1.0;
+            match output {
+                StatsOutputFormat::Text => {
+                    stats_output_text(scenario_name, previous_runs, &db_conn).await?;
                 }
-                println!("{}", table.render());
-
-                // let x_max = points.len() as f32;
-                // let y_data = points.iter().map(|(_, y)| *y);
-                // let y_min = y_data.clone().reduce(f32::min).unwrap_or(0.0);
-                // let y_max = y_data.clone().reduce(f32::max).unwrap_or(0.0);
-                //
-                // Chart::new_with_y_range(128, 64, 0.0, x_max, y_min, y_max)
-                //     .x_axis_style(textplots::LineStyle::Solid)
-                //     .y_tick_display(TickDisplay::Sparse)
-                //     .lineplot(&Shape::Lines(&points))
-                //     .nice();
+                StatsOutputFormat::Json => {
+                    stats_output_json(scenario_name, previous_runs, &db_conn).await?;
+                }
             }
         }
 
